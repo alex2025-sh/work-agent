@@ -89,7 +89,7 @@ const gorows = gotests.map(([r, n, t]) => `<tr><td><span class="tag">${e((desc[n
 const abort = R.abort ? `<div class="panel" style="border-color:var(--bad)"><h2 style="color:var(--bad)">运行中止</h2><p>${e(R.abort)}</p></div>` : '';
 
 const html = `<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Bywork 端到端测试报告</title>
+<title>Bywork SOP 集成测试报告</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;700&display=swap">
 <style>__CSS__</style></head><body><div class="wrap">
 <header><p class="eyebrow">End-to-end test report</p><h1>Bywork 端到端测试报告</h1>
