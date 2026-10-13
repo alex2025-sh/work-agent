@@ -143,7 +143,7 @@ func newAI(c config.Config, conn sqlx.SqlConn, tasks *task.Service, clk clock.Cl
 	switch c.AI.Provider {
 	case "openclaw", "openai":
 		llm = &ai.OpenAICompat{BaseURL: c.AI.BaseURL, APIKey: c.AI.APIKey, Model: c.AI.Model, Headers: c.AI.Headers,
-			Label: c.AI.Provider + " · " + c.AI.Model}
+			Label: c.AI.Model}
 	}
 	timeout, err := time.ParseDuration(c.AI.TurnTimeout)
 	if err != nil {

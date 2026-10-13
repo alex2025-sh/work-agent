@@ -84,10 +84,12 @@ func registerDev(server *rest.Server, sc *svc.ServiceContext, auth func(http.Han
 			})
 		})},
 		{Method: http.MethodPost, Path: "/api/dev/cases/:appeal/update", Handler: h(func(r *http.Request) (any, error) {
-			// move a case: {"status":"closed"} or {"stage":"maker_review"}; closing emits case.closed
+			// move a case: {"status":"closed"} or {"stage":"maker_review"}; closing emits case.closed.
+			// {"vip": false} changes the VIP flag of the case's user (demo_vip).
 			var req struct {
 				Status string `json:"status"`
 				Stage  string `json:"stage"`
+				Vip    *bool  `json:"vip"`
 			}
 			if err := bind(r, &req); err != nil {
 				return nil, err
@@ -96,6 +98,19 @@ func registerDev(server *rest.Server, sc *svc.ServiceContext, auth func(http.Han
 			if req.Stage != "" {
 				entry := id + "-" + expr.ToString(now)
 				if _, err := sc.Conn.ExecCtx(r.Context(), "UPDATE demo_case SET stage=?, stage_entered_at=?, maker_review_entry_id=?, updated_at=? WHERE appeal_id=?", req.Stage, now, entry, now, id); err != nil {
+					return nil, err
+				}
+			}
+			if req.Vip != nil {
+				var uid string
+				if err := sc.Conn.QueryRowCtx(r.Context(), &uid, "SELECT uid FROM demo_case WHERE appeal_id=?", id); err != nil {
+					return nil, task.NotFound("Case %s 不存在", id)
+				}
+				v := 0
+				if *req.Vip {
+					v = 1
+				}
+				if _, err := sc.Conn.ExecCtx(r.Context(), "UPDATE demo_vip SET is_vip=? WHERE uid=?", v, uid); err != nil {
 					return nil, err
 				}
 			}

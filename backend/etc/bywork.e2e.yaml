@@ -27,6 +27,10 @@ DisplayTimezone: Asia/Kuala_Lumpur
 ScanBudget: 45s
 OutboxMaxTry: 6
 
+# SOP run: scripted; AI run: openclaw against e2e/fake-openclaw.mjs (set by scripts/e2e-local.sh)
 AI:
   Enabled: true
-  Provider: scripted      # deterministic stand-in; production uses openclaw
+  Provider: ${BYWORK_E2E_AI_PROVIDER}
+  BaseURL: ${BYWORK_E2E_AI_URL}
+  APIKey: e2e-gateway-token
+  Model: openclaw/bywork

@@ -28,7 +28,8 @@ export interface TypeInfo {
 export default function TaskTypeDetail() {
   const { key = '', tab = 'config' } = useParams();
   const nav = useNavigate();
-  const { refreshKey } = useSession();
+  const { refreshKey, me } = useSession();
+  const canConfigure = me?.user.role === 'config' || me?.user.role === 'admin';
   const [info, setInfo] = useState<TypeInfo | null>(null);
   const [publishing, setPublishing] = useState(false);
   const [assistant, setAssistant] = useState(false);
@@ -62,9 +63,9 @@ export default function TaskTypeDetail() {
           </div>
           <div className="row gap-s">
             <Lifecycle t={t} onDone={refresh} />
-            <button onClick={() => setAssistant(true)} title="用对话修改采集配置和处理流程，确认 diff 后写入草稿">
+            {canConfigure && <button onClick={() => setAssistant(true)} title="用对话修改采集配置和处理流程，确认 diff 后写入草稿">
               AI 助手
-            </button>
+            </button>}
             <button className="primary" onClick={() => setPublishing(true)}>
               发布…
             </button>

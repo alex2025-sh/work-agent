@@ -80,6 +80,8 @@ AI:
 ## 5. 测试
 
 - `go test ./internal/ai/`：覆盖脚本模拟的配置提议 → 接受 → 过期（stale）、卡片提议、权限检查；用一个**模拟 OpenClaw** 的 httptest 服务验证 `Authorization`、`model`、流式分片 `tool_calls` 合并、`tool_call_id` 回传、无状态历史和错误流；另外覆盖脱敏、表白名单、无效流程提议。也可以在 MySQL 上跑：`BYWORK_TEST_MYSQL_DSN='bywork:bywork@tcp(127.0.0.1:3306)/' go test ./internal/ai/`。
-- `scripts/e2e-local.sh`：浏览器走完「AI 配置助手」一步，包括发送消息、出现提议、查看 diff、接受，并确认草稿 revision 增加。
+- `scripts/e2e-local.sh`：
+  - SOP 浏览器测试中包含脚本模拟模式下的一步（发送消息、提议、查看 diff、接受）。
+  - 单独的 AI 浏览器测试（`e2e/ai.e2e.mjs`，63 条断言）：后端以 `Provider: openclaw` 连接 `e2e/fake-openclaw.mjs`，覆盖用对话修改采集配置、处理流程（含校验失败后模型自我修正）和卡片，接受、发布后验证实际生效（新门槛、新分支执行、新卡片字段），以及各项护栏。详见 [e2e.md](e2e.md)。
 
 **尚未验证**：没有连接真实的 OpenClaw 服务。接口按 OpenAI Chat Completions 的流式协议实现，并用模拟服务测试过。接入时请先用 `Provider: openclaw` 发一条消息，确认对方会返回 `tool_calls`。如果服务不支持客户端 tools，模型只会回复文本，不会产生提议。

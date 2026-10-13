@@ -209,6 +209,9 @@ export default function AIAssistant({ typeKey, onClose, onAccepted }: { typeKey:
       setBusy(false);
       // the session list title and proposal statuses come from the server
       get<any[]>(`/api/task-types/${typeKey}/ai/sessions`).then(setSessions).catch(() => {});
+      get(`/api/ai/sessions/${id}`)
+        .then((v: any) => setProposals((m) => ({ ...m, ...Object.fromEntries((v.proposals || []).map((p: Proposal) => [p.id, p])) })))
+        .catch(() => {});
     }
   };
 
@@ -223,6 +226,7 @@ export default function AIAssistant({ typeKey, onClose, onAccepted }: { typeKey:
       if (e instanceof ApiError && e.code === 409) {
         const fresh = await get<Proposal>(`/api/ai/proposals/${p.id}`).catch(() => null);
         if (fresh) setProposals((m) => ({ ...m, [p.id]: { ...m[p.id], status: fresh.status } }));
+        onAccepted(); // the draft changed underneath: show the current one
       }
       run(() => Promise.reject(e));
       return false;
@@ -234,7 +238,11 @@ export default function AIAssistant({ typeKey, onClose, onAccepted }: { typeKey:
       <div className="ai-head">
         <div className="row gap-s">
           <strong>AI 配置助手</strong>
-          {status?.enabled && <span className={`pill ${status.scripted ? 'amber' : 'green'}`}>{status.model}</span>}
+          {status?.enabled && (
+            <span className={`pill ${status.scripted ? 'amber' : 'green'}`} title={`模型服务：${status.provider} · ${status.model} · prompt ${status.prompt_version}`}>
+              {status.model}
+            </span>
+          )}
         </div>
         <div className="row gap-s">
           {status?.enabled && sessions.length > 0 && (

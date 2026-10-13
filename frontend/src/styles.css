@@ -274,10 +274,11 @@ table.tbl { width: 100%; border-collapse: collapse; }
   display: flex; flex-direction: column;
 }
 .ai-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 12px 14px; border-bottom: 1px solid var(--line); }
-.ai-head > .row:first-child { flex-shrink: 0; }
 .ai-head strong, .ai-head .pill { white-space: nowrap; }
+.ai-head .pill { max-width: 150px; overflow: hidden; text-overflow: ellipsis; }
+.ai-head > .row:first-child { min-width: 0; flex-shrink: 1; }
 .ai-head > .row:last-child { min-width: 0; }
-.ai-head select { min-width: 0; max-width: 150px; }
+.ai-head select { width: 128px; min-width: 96px; }
 .ai-body { flex: 1; overflow: auto; padding: 14px; display: flex; flex-direction: column; gap: 8px; }
 .ai-empty { color: var(--muted); font-size: 13px; line-height: 1.6; }
 .ai-suggest { display: block; margin-top: 6px; text-align: left; }
