@@ -1,0 +1,36 @@
+Name: bywork
+Host: 0.0.0.0
+Port: 8888
+Timeout: 60000
+Log:
+  Encoding: plain
+  Level: info
+
+DB:
+  Driver: sqlite            # mysql in production
+  DSN: file:bywork.db       # e.g. user:pass@tcp(host:3306)/bywork?parseTime=false&charset=utf8mb4
+
+# Read-only datasources for 数仓 SQL triggers (production: read-only account / replica)
+# ReadOnlySources:
+#   dw_vip: ro_user:pass@tcp(replica:3306)/vip
+
+Dev: true                   # dev clock, user switcher login, /api/dev/*
+Seed: true                  # seed members, demo cases and the two VIP task types
+InternalTicker: true        # run heartbeats in-process; set false when XXL-Job calls /api/jobs/*
+JobToken: dev-job-token
+PushToken: dev-push-token
+StaticDir: ../frontend/dist
+
+LinkDomains: [lark.example.com, crm.example.com]
+SignKey: dev-sign-key
+WebBaseURL: http://localhost:8888
+DisplayTimezone: Asia/Kuala_Lumpur
+ScanBudget: 45s
+OutboxMaxTry: 6
+
+Lark:
+  Enabled: false            # true: deliver via Lark Open API instead of the in-memory dev sender
+  BaseURL: https://open.larksuite.com
+  AppID: ""
+  AppSecret: ""
+  VerificationToken: ""

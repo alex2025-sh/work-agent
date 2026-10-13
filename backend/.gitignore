@@ -1,0 +1,4 @@
+/bywork
+*.db
+*.db-shm
+*.db-wal
