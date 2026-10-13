@@ -28,6 +28,18 @@ DisplayTimezone: Asia/Kuala_Lumpur
 ScanBudget: 45s
 OutboxMaxTry: 6
 
+# AI 配置助手 (docs/ai-assistant.md)
+AI:
+  Enabled: true
+  Provider: scripted        # openclaw: call the internal OpenClaw service; scripted: offline demo without a model
+  BaseURL: http://127.0.0.1:18789/v1   # OpenClaw OpenAI-compatible endpoint
+  APIKey: ""                # or env BYWORK_AI_API_KEY
+  Model: openclaw/bywork    # openclaw/<agentId>
+  SampleRows: masked        # masked | none — whether sample_query returns (masked) rows to the model
+  AllowedTables: [demo_case, demo_vip]
+  MaxSteps: 12
+  TurnTimeout: 5m
+
 Lark:
   Enabled: false            # true: deliver via Lark Open API instead of the in-memory dev sender
   BaseURL: https://open.larksuite.com

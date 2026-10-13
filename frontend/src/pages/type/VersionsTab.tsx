@@ -1,31 +1,8 @@
 import { useEffect, useState } from 'react';
 import { fmtTime, get, post } from '../../api';
 import { useRun } from '../../components/ui';
+import { lineDiff as diff } from '../../components/diff';
 import type { TypeInfo } from '../TaskTypeDetail';
-
-/** Line diff (LCS) of two pretty-printed JSON docs. */
-function diff(a: string, b: string) {
-  const x = a.split('\n');
-  const y = b.split('\n');
-  const n = x.length;
-  const m = y.length;
-  const dp: number[][] = Array.from({ length: n + 1 }, () => new Array(m + 1).fill(0));
-  for (let i = n - 1; i >= 0; i--) for (let j = m - 1; j >= 0; j--) dp[i][j] = x[i] === y[j] ? dp[i + 1][j + 1] + 1 : Math.max(dp[i + 1][j], dp[i][j + 1]);
-  const out: { t: string; s: string }[] = [];
-  let i = 0;
-  let j = 0;
-  while (i < n && j < m) {
-    if (x[i] === y[j]) {
-      out.push({ t: ' ', s: x[i] });
-      i++;
-      j++;
-    } else if (dp[i + 1][j] >= dp[i][j + 1]) out.push({ t: '-', s: x[i++] });
-    else out.push({ t: '+', s: y[j++] });
-  }
-  while (i < n) out.push({ t: '-', s: x[i++] });
-  while (j < m) out.push({ t: '+', s: y[j++] });
-  return out;
-}
 
 export default function VersionsTab({ typeKey, info, onChanged }: { typeKey: string; info: TypeInfo; onChanged: () => void }) {
   const [configs, setConfigs] = useState<any[]>([]);

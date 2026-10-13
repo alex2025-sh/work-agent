@@ -427,6 +427,8 @@ func RegisterHandlers(server *rest.Server, sc *svc.ServiceContext) {
 	// ---------- Lark card callback ----------
 	server.AddRoute(rest.Route{Method: http.MethodPost, Path: "/api/lark/callback", Handler: larkCallback(sc)})
 
+	registerAI(server, sc, auth)
+
 	if sc.Config.Dev {
 		registerDev(server, sc, auth)
 	}

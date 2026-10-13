@@ -1,6 +1,6 @@
 # ADR 0001：AI 配置助手的模型接入方式（OpenClaw vs LiteLLM）
 
-- 状态：提议（待平台团队确认第 5 节的问题）
+- 状态：已被 [ADR 0002](0002-ai-assistant-on-openclaw.md) 取代（采用公司内部 OpenClaw 服务）
 - 日期：2026-10-13
 - 范围：Bywork「通过 AI 对话生成采集配置和处理流程」功能的模型接入层
 

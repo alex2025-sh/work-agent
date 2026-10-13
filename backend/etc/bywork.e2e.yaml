@@ -26,3 +26,7 @@ WebBaseURL: http://localhost:${BYWORK_E2E_PORT}
 DisplayTimezone: Asia/Kuala_Lumpur
 ScanBudget: 45s
 OutboxMaxTry: 6
+
+AI:
+  Enabled: true
+  Provider: scripted      # deterministic stand-in; production uses openclaw

@@ -9,6 +9,7 @@ import CardTab from './type/CardTab';
 import VersionsTab from './type/VersionsTab';
 import RecordsTab from './type/RecordsTab';
 import PublishDialog from './type/PublishDialog';
+import AIAssistant from '../components/AIAssistant';
 
 const tabs: [string, string][] = [
   ['config', '采集配置'],
@@ -30,6 +31,7 @@ export default function TaskTypeDetail() {
   const { refreshKey } = useSession();
   const [info, setInfo] = useState<TypeInfo | null>(null);
   const [publishing, setPublishing] = useState(false);
+  const [assistant, setAssistant] = useState(false);
   const [reload, setReload] = useState(0);
   const load = useCallback(() => {
     get<TypeInfo>(`/api/task-types/${key}`).then(setInfo);
@@ -60,6 +62,9 @@ export default function TaskTypeDetail() {
           </div>
           <div className="row gap-s">
             <Lifecycle t={t} onDone={refresh} />
+            <button onClick={() => setAssistant(true)} title="用对话修改采集配置和处理流程，确认 diff 后写入草稿">
+              AI 助手
+            </button>
             <button className="primary" onClick={() => setPublishing(true)}>
               发布…
             </button>
@@ -83,6 +88,7 @@ export default function TaskTypeDetail() {
           {tab === 'records' && <RecordsTab typeKey={key} info={info} />}
         </div>
       )}
+      {assistant && <AIAssistant typeKey={key} onClose={() => setAssistant(false)} onAccepted={refresh} />}
       {publishing && (
         <PublishDialog
           typeKey={key}
