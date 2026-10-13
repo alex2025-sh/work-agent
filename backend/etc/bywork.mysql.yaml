@@ -1,0 +1,30 @@
+# Local development on MySQL with demo + mock data.
+#   export BYWORK_MYSQL_DSN='root:password@tcp(127.0.0.1:3306)/bywork?charset=utf8mb4'
+#   go run . -f etc/bywork.mysql.yaml
+Name: bywork
+Host: 0.0.0.0
+Port: 8888
+Timeout: 60000
+Log:
+  Encoding: plain
+  Level: info
+
+DB:
+  Driver: mysql
+  DSN: ${BYWORK_MYSQL_DSN}
+
+Dev: true
+Seed: true            # first start on an empty database: members, demo cases, the two VIP task types
+MockCases: 200        # plus 200 random CRM cases across every SOP scenario (0 to disable)
+MockSeed: 1
+InternalTicker: true
+JobToken: dev-job-token
+PushToken: dev-push-token
+StaticDir: ../frontend/dist
+
+LinkDomains: [lark.example.com, crm.example.com]
+SignKey: dev-sign-key
+WebBaseURL: http://localhost:8888
+DisplayTimezone: Asia/Kuala_Lumpur
+ScanBudget: 45s
+OutboxMaxTry: 6

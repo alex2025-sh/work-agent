@@ -3,7 +3,6 @@ package task_test
 import (
 	"context"
 	"encoding/json"
-	"path/filepath"
 	"strings"
 	"testing"
 	"time"
@@ -32,10 +31,7 @@ type env struct {
 func newEnv(t *testing.T) *env {
 	t.Helper()
 	logx.Disable()
-	raw, conn, err := db.Open("sqlite", "file:"+filepath.Join(t.TempDir(), "t.db"))
-	if err != nil {
-		t.Fatal(err)
-	}
+	raw, conn := db.OpenForTest(t) // SQLite by default; MySQL when BYWORK_TEST_MYSQL_DSN is set
 	clk := clock.NewFixed(time.Date(2026, 10, 13, 6, 0, 0, 0, time.UTC))
 	sources := datasrc.NewSources(5*time.Second, 5000)
 	sources.Add("demo", raw)
@@ -526,4 +522,60 @@ func TestPushIdempotent(t *testing.T) {
 func mustJSON(v any) json.RawMessage {
 	b, _ := json.Marshal(v)
 	return b
+}
+
+// Mock data: every generated case lands where its scenario says it should.
+func TestMockDataScenarios(t *testing.T) {
+	e := newEnv(t)
+	st, err := seed.Mock(e.ctx, e.conn, e.clk.Now(), 120, 42)
+	if err != nil {
+		t.Fatal(err)
+	}
+	e.tick()
+	type row struct {
+		AppealID string `db:"appeal_id"`
+		Tasks    int64  `db:"tasks"`
+		Stage    string `db:"stage"`
+		Status   string `db:"status"`
+		IsVip    int64  `db:"is_vip"`
+		CaseType string `db:"case_type"`
+		Entered  int64  `db:"stage_entered_at"`
+	}
+	var rows []row
+	if err := e.conn.QueryRowsPartialCtx(e.ctx, &rows, `SELECT c.appeal_id, c.stage, c.status, v.is_vip, c.case_type, c.stage_entered_at,
+		(SELECT COUNT(1) FROM bw_task t WHERE t.object_key = c.appeal_id) AS tasks
+		FROM demo_case c JOIN demo_vip v ON v.uid = c.uid WHERE c.appeal_id LIKE 'AP-MOCK-%'`); err != nil {
+		t.Fatal(err)
+	}
+	if len(rows) != st.Cases {
+		t.Fatalf("rows %d != cases %d", len(rows), st.Cases)
+	}
+	target := map[string]bool{"withdrawal_appeal": true, "account_appeal": true, "trading_appeal": true}
+	created := 0
+	for _, r := range rows {
+		eligible := r.IsVip == 1 && target[r.CaseType] && r.Status == "open"
+		want := 0
+		switch {
+		case eligible && r.Stage == "first_review":
+			want = 1 // SOP 1
+		case eligible && r.Stage == "maker_review" && e.clk.Now().UnixMilli()-r.Entered >= 48*3600_000:
+			want = 1 // SOP 2
+		}
+		if int(r.Tasks) != want {
+			t.Errorf("%s (vip=%d type=%s stage=%s status=%s): %d tasks, want %d", r.AppealID, r.IsVip, r.CaseType, r.Stage, r.Status, r.Tasks, want)
+		}
+		created += int(r.Tasks)
+	}
+	if created == 0 {
+		t.Fatal("mock data produced no tasks")
+	}
+	// a second scan never duplicates
+	e.clk.Advance(10 * time.Minute)
+	e.tick()
+	var dup int64
+	_ = e.conn.QueryRowCtx(e.ctx, &dup, "SELECT COUNT(1) FROM (SELECT object_key FROM bw_task GROUP BY type_key, object_key HAVING COUNT(1) > 1) d")
+	if dup != 0 {
+		t.Fatalf("%d duplicated tasks after rescan", dup)
+	}
+	t.Logf("mock: %d cases → %d tasks; %v", st.Cases, created, st.ByScenario)
 }

@@ -27,8 +27,11 @@ cd ../backend && go run . -f etc/bywork.yaml
 ## 测试
 
 ```bash
-cd backend && go test ./...
+cd backend && go test ./...                                   # SQLite
+MYSQL_USER=bywork MYSQL_PASSWORD=bywork scripts/e2e-local.sh  # MySQL：Go 端到端 + 浏览器端到端 + HTML 报告
 ```
+
+本地端到端、MySQL 配置、mock 数据见 **[docs/e2e.md](docs/e2e.md)**。本地 MySQL 开发环境（自动生成 200 个 mock Case）：`go run . -f etc/bywork.mysql.yaml`。
 
 `internal/task/task_test.go` 用可控时钟端到端覆盖了两条需求：48h Closed → 等待 → 满 7 天仍在 Maker Review 时刷新原卡片；首次发现已满 7 天直接进入 7d 节点；节点定时作废本轮；离开阶段以"Case 已失效"结束；延迟到 `case.created_at + 3d` 复查、第二轮只保留 Closed；点击时提醒时间已过则立即复查；Case 关闭事件自动关闭；幂等键（同键同参 / 同键异参）；旧卡片版本被拒绝；RM 映射缺失进入"需要关注"并由 Leader 指派；投递最终失败；成员离职；字段契约拦截与"一起发布"；单次上限熔断；影子运行（不推送、独立去重命名空间、启用时关闭影子任务）；Push 幂等与资格前置。另有 SQL 参数绑定 / 只读约束的单测。
 
@@ -54,7 +57,12 @@ frontend/src/
   pages/type/CardTab.tsx    任务类型 · 卡片
   pages/type/PublishDialog.tsx 发布确认 · 一起发布
   pages/DevPanel.tsx        演示台
+e2e/
+  sop.e2e.mjs               浏览器端到端（Playwright），两条 SOP 全流程，逐步截图与断言
+  report.mjs                生成 HTML 报告
+scripts/e2e-local.sh        一键本地端到端（MySQL / SQLite）
 docs/
+  e2e.md                    本地端到端与 mock 数据
   implementation.md         设计 → 实现对照、生产部署说明、未完成项
   schema.mysql.sql          MySQL DDL
 ```

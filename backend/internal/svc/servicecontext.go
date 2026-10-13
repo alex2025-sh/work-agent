@@ -78,6 +78,13 @@ func NewServiceContext(c config.Config) (*ServiceContext, error) {
 		if err := seed.Run(ctx, conn, tasks, clk.Now()); err != nil {
 			return nil, fmt.Errorf("seed: %w", err)
 		}
+		if c.MockCases > 0 {
+			st, err := seed.Mock(ctx, conn, clk.Now(), c.MockCases, c.MockSeed)
+			if err != nil {
+				return nil, fmt.Errorf("mock: %w", err)
+			}
+			logx.Infof("mock data: %d cases %v", st.Cases, st.ByScenario)
+		}
 	}
 	return &ServiceContext{Config: c, Conn: conn, Clock: clk, DevClock: dev, Engine: eng, Tasks: tasks, DevSender: devSender}, nil
 }

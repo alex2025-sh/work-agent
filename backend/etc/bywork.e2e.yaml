@@ -1,0 +1,28 @@
+# Used by scripts/e2e-local.sh: fresh database, base demo data only (no mock
+# cases) so the browser run is deterministic.
+Name: bywork-e2e
+Host: 127.0.0.1
+Port: ${BYWORK_E2E_PORT}
+Timeout: 60000
+Log:
+  Encoding: plain
+  Level: error
+
+DB:
+  Driver: ${BYWORK_E2E_DRIVER}
+  DSN: ${BYWORK_E2E_DSN}
+
+Dev: true
+Seed: true
+MockCases: 0
+InternalTicker: false   # the browser run drives the heartbeats through the dev clock
+JobToken: dev-job-token
+PushToken: dev-push-token
+StaticDir: ${BYWORK_E2E_STATIC}
+
+LinkDomains: [lark.example.com, crm.example.com]
+SignKey: dev-sign-key
+WebBaseURL: http://localhost:${BYWORK_E2E_PORT}
+DisplayTimezone: Asia/Kuala_Lumpur
+ScanBudget: 45s
+OutboxMaxTry: 6

@@ -15,6 +15,8 @@ type Config struct {
 
 	Dev            bool   `json:",default=true"` // dev clock, X-Bywork-User login, demo endpoints
 	Seed           bool   `json:",default=true"` // seed demo data when the DB is empty
+	MockCases      int    `json:",default=0"`    // with Seed: also generate N random mock CRM cases
+	MockSeed       int64  `json:",default=1"`    // random seed for reproducible mock data
 	InternalTicker bool   `json:",default=true"` // run heartbeats in-process (no XXL-Job)
 	JobToken       string `json:",default=dev-job-token"`
 	PushToken      string `json:",default=dev-push-token"`
