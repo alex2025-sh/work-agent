@@ -10,6 +10,7 @@ import (
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 
+	"bywork/internal/ai"
 	"bywork/internal/clock"
 	"bywork/internal/config"
 	"bywork/internal/datasrc"
@@ -27,6 +28,7 @@ type ServiceContext struct {
 	Engine    *engine.Engine
 	Tasks     *task.Service
 	DevSender *task.LogSender
+	AI        *ai.Service // nil when the assistant is disabled
 }
 
 func NewServiceContext(c config.Config) (*ServiceContext, error) {
@@ -86,7 +88,12 @@ func NewServiceContext(c config.Config) (*ServiceContext, error) {
 			logx.Infof("mock data: %d cases %v", st.Cases, st.ByScenario)
 		}
 	}
-	return &ServiceContext{Config: c, Conn: conn, Clock: clk, DevClock: dev, Engine: eng, Tasks: tasks, DevSender: devSender}, nil
+	sc := &ServiceContext{Config: c, Conn: conn, Clock: clk, DevClock: dev, Engine: eng, Tasks: tasks, DevSender: devSender}
+	if c.AI.Enabled {
+		sc.AI = newAI(c, conn, tasks, clk)
+		logx.Infof("AI assistant enabled: provider=%s model=%s", c.AI.Provider, c.AI.Model)
+	}
+	return sc, nil
 }
 
 // StartBackground runs the in-process outbox sender and, when enabled, the
@@ -129,4 +136,19 @@ func (s *ServiceContext) Tick(ctx context.Context) TickResult {
 		logx.Errorf("outbox tick: %v", err)
 	}
 	return r
+}
+
+func newAI(c config.Config, conn sqlx.SqlConn, tasks *task.Service, clk clock.Clock) *ai.Service {
+	var llm ai.LLM = ai.Scripted{}
+	switch c.AI.Provider {
+	case "openclaw", "openai":
+		llm = &ai.OpenAICompat{BaseURL: c.AI.BaseURL, APIKey: c.AI.APIKey, Model: c.AI.Model, Headers: c.AI.Headers,
+			Label: c.AI.Model}
+	}
+	timeout, err := time.ParseDuration(c.AI.TurnTimeout)
+	if err != nil {
+		timeout = 5 * time.Minute
+	}
+	return ai.New(conn, tasks, llm, clk, ai.Config{Enabled: true, Provider: c.AI.Provider, SampleRows: c.AI.SampleRows,
+		AllowedTables: c.AI.AllowedTables, MaxSteps: c.AI.MaxSteps, TurnTimeout: timeout, Stateful: c.AI.Stateful})
 }

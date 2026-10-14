@@ -8,7 +8,11 @@ import { fileURLToPath } from 'node:url';
 const here = path.dirname(fileURLToPath(import.meta.url));
 const OUT = path.resolve(process.argv[2] || process.env.E2E_OUT || path.join(here, 'out'));
 const css = "\n/* layout: single reading column; summary tiles, then per-SOP step cards with checks beside evidence screenshots */\n:root {\n  --bg: #f6f7f5; --surface: #ffffff; --ink: #18211d; --muted: #5d6a63; --line: #dfe4e0;\n  --accent: #17634f; --accent-soft: #e2efe9; --ok: #17634f; --bad: #b42318; --bad-soft: #fde8e6;\n  --code-bg: #eef2ef;\n  --f-body: \"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", system-ui, sans-serif;\n  --f-mono: \"IBM Plex Mono\", ui-monospace, SFMono-Regular, Menlo, monospace;\n}\n@media (prefers-color-scheme: dark) { :root:not([data-theme=\"light\"]) {\n  --bg: #111613; --surface: #18201c; --ink: #e5ece8; --muted: #9aa9a1; --line: #2a3530;\n  --accent: #5cc3a1; --accent-soft: #1d3a30; --ok: #5cc3a1; --bad: #ff8a7a; --bad-soft: #3b1d1a; --code-bg: #212b26; color-scheme: dark } }\n:root[data-theme=\"dark\"] {\n  --bg: #111613; --surface: #18201c; --ink: #e5ece8; --muted: #9aa9a1; --line: #2a3530;\n  --accent: #5cc3a1; --accent-soft: #1d3a30; --ok: #5cc3a1; --bad: #ff8a7a; --bad-soft: #3b1d1a; --code-bg: #212b26; color-scheme: dark }\nbody { background: var(--bg); color: var(--ink); font: 15px/1.65 var(--f-body); }\n.wrap { max-width: 1120px; margin: 0 auto; padding-inline: 20px; padding-block: 40px 72px; display: grid; gap: 40px; }\nh1, h2, h3 { text-wrap: balance; margin: 0; line-height: 1.3; }\nh1 { font-size: clamp(26px, 4vw, 34px); font-weight: 700; letter-spacing: .01em; }\nh2 { font-size: 22px; font-weight: 700; }\nh3 { font-size: 16px; font-weight: 500; }\ncode { font-family: var(--f-mono); font-size: 12.5px; }\n.eyebrow { margin: 0 0 6px; font: 500 12px var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }\n.meta { display: flex; flex-wrap: wrap; gap: 6px 18px; color: var(--muted); font-size: 13px; margin-top: 10px; }\n.meta code { color: var(--ink); }\n.lede { max-width: 68ch; color: var(--muted); margin: 14px 0 0; }\n.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; }\n.tile { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; min-width: 0; }\n.tile .n { font: 500 30px/1.1 var(--f-mono); font-variant-numeric: tabular-nums; color: var(--ok); }\n.tile .k { font-weight: 500; margin-top: 6px; }\n.tile .h { color: var(--muted); font-size: 12.5px; }\n.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 20px 22px; min-width: 0; }\n.two { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; }\n.panel h2 { font-size: 16px; margin-bottom: 8px; }\n.panel ul { margin: 0; padding-left: 1.1em; } .panel li { margin: 3px 0; }\n.clock { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0; border-top: 2px solid var(--accent); margin-top: 10px; }\n.clock div { padding: 10px 12px 0 0; font-size: 13px; color: var(--muted); }\n.clock b { display: block; font: 500 13px var(--f-mono); color: var(--ink); }\n.sop { display: grid; gap: 18px; }\n.sophead { border-bottom: 1px solid var(--line); padding-bottom: 12px; }\n.blurb { margin: 6px 0 0; color: var(--muted); }\n.tally { font: 500 12.5px var(--f-mono); color: var(--ok); margin-left: 6px; white-space: nowrap; }\n.step { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 18px 20px 20px; display: grid; gap: 12px; min-width: 0; }\n.step header { display: flex; align-items: baseline; gap: 10px; }\n.step h3 { flex: 1; min-width: 0; }\n.sid { font: 500 12px var(--f-mono); color: var(--muted); }\n.sd { margin: 0; color: var(--muted); max-width: 80ch; }\n.badge { font: 500 12px var(--f-mono); padding: 1px 8px; border-radius: 999px; white-space: nowrap; }\n.badge.pass { background: var(--accent-soft); color: var(--ok); }\n.badge.fail { background: var(--bad-soft); color: var(--bad); }\n.checks { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }\n.checks li { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; font-size: 14px; }\n.checks .mk { width: 14px; font-weight: 700; color: var(--ok); }\n.checks .bad .mk, .checks .bad .cn { color: var(--bad); }\n.checks .cd { background: var(--code-bg); padding: 0 6px; border-radius: 4px; color: var(--muted); overflow-wrap: anywhere; min-width: 0; }\n.figs { display: grid; gap: 14px; grid-template-columns: 1fr; }\n.figs.n2, .figs.n3 { grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }\nfigure { margin: 0; min-width: 0; }\nfigure img { display: block; width: 100%; height: auto; border: 1px solid var(--line); border-radius: 8px; background: #fff; }\nfigure a:focus-visible img { outline: 3px solid var(--accent); outline-offset: 2px; }\nfigcaption { font-size: 13px; color: var(--muted); margin-top: 6px; }\n.tablewrap { overflow-x: auto; }\ntable { width: 100%; border-collapse: collapse; font-size: 14px; }\nth { text-align: left; font-weight: 500; color: var(--muted); font-size: 12.5px; border-bottom: 1px solid var(--line); padding: 6px 8px; }\ntd { border-bottom: 1px solid var(--line); padding: 8px; vertical-align: top; }\ntr:last-child td { border-bottom: 0; }\ntd.num { font-family: var(--f-mono); font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }\n.gdesc { color: var(--muted); font-size: 13px; }\n.tag { font: 500 11.5px var(--f-mono); color: var(--accent); white-space: nowrap; }\npre { background: var(--code-bg); border-radius: 8px; padding: 12px 14px; overflow-x: auto; font: 12.5px/1.6 var(--f-mono); margin: 8px 0 0; }\nnav.toc { display: flex; flex-wrap: wrap; gap: 8px; }\nnav.toc a { color: var(--accent); text-decoration: none; border: 1px solid var(--line); background: var(--surface); padding: 4px 12px; border-radius: 999px; font-size: 13px; }\nnav.toc a:hover { border-color: var(--accent); }\nnav.toc a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }\n";
-const R = JSON.parse(fs.readFileSync(path.join(OUT, 'results.json'), 'utf8'));
+const readJSON = (f) => (fs.existsSync(f) ? JSON.parse(fs.readFileSync(f, 'utf8')) : null);
+// SOP run (out/results.json) and AI-assistant run (out/ai/results.json, shot paths already prefixed with ai/)
+const SOP = readJSON(path.join(OUT, 'results.json')) || { steps: [], pageErrors: [], at: new Date().toISOString() };
+const AI = readJSON(path.join(OUT, 'ai', 'results.json'));
+const R = { steps: [...SOP.steps, ...(AI?.steps || [])], pageErrors: [...(SOP.pageErrors || []), ...(AI?.pageErrors || [])], at: AI?.at || SOP.at, abort: [SOP.abort, AI?.abort].filter(Boolean).join('；') };
 const gotxt = fs.existsSync(path.join(OUT, 'gotest.txt')) ? fs.readFileSync(path.join(OUT, 'gotest.txt'), 'utf8') : '';
 const e = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 const git = (cmd) => { try { return execSync(cmd, { cwd: here, stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim(); } catch { return ''; } };
@@ -34,8 +38,17 @@ const desc = {
   TestShadowRun: ['配置', '影子运行不推送、不进待办；启用时关闭影子任务，真任务不受去重阻挡'],
   TestPushIdempotent: ['SOP 1', '业务 Push 按 event_id 幂等；同 Case 去重；不满足资格不建任务'],
   TestMockDataScenarios: ['数据', '随机 mock Case 按场景建 / 不建任务；重复扫描不重复'],
+  TestScriptedConfigProposalAcceptAndStale: ['AI', '配置提议 → 接受写入草稿；RM 不能接受；草稿变化后提议过期'],
+  TestScriptedFlowCardProposal: ['AI', '卡片提议的变更摘要与接受'],
+  TestScriptedUnknownRequest: ['AI', '脚本模拟不认识的请求只回复说明；RM 不能开会话'],
+  TestOpenClawToolLoop: ['AI', '模拟 OpenClaw：鉴权、model、分片 tool_calls、tool_call_id 回传、无状态历史'],
+  TestOpenClawError: ['AI', '模型服务 401 / 错误流：显示错误，会话可继续'],
+  TestSampleQueryMaskingAndAllowlist: ['AI', '样本脱敏、表白名单、SampleRows=none'],
+  TestProposeFlowInvalid: ['AI', '未知节点类型、孤立节点的流程提议不能接受'],
 };
 const checks = R.steps.flatMap((s) => s.checks);
+const aiChecks = (AI?.steps || []).flatMap((s) => s.checks);
+const aiPass = aiChecks.filter((c) => c.ok).length;
 const npass = checks.filter((c) => c.ok).length;
 const gpass = gotests.filter((g) => g[0] === 'PASS').length;
 const nshots = R.steps.reduce((a, s) => a + s.shots.length, 0);
@@ -49,6 +62,12 @@ const groups = [
   ['SOP 2', 'sop2', 'VIP_ONGOING_REVIEW', 'Maker Review 超时提醒（方案 A）', '停留 ≥ 48h 提醒；满 7 天仍在 Maker Review 则在同一任务上刷新原卡片。'],
   ['运营', 'ops', '', 'Leader 队列', '需要关注、指派。'],
   ['配置', 'cfg', '', '配置端', '流程编辑器与发布前检查。'],
+  ['AI · 入口', 'ai-entry', 'VIP_ONGOING_REVIEW', 'AI 配置助手 · 入口与权限', '后端接入 OpenClaw（e2e 中为模拟 OpenClaw 服务，走真实的流式 + 客户端工具协议）。'],
+  ['AI · 采集配置', 'ai-config', 'VIP_ONGOING_REVIEW', 'AI 配置助手 · 修改采集配置', '对话 → 工具调用 → 提议与校验 → diff → 接受到草稿。'],
+  ['AI · 处理流程', 'ai-flow', 'VIP_ONGOING_REVIEW', 'AI 配置助手 · 修改处理流程', '模型用操作列表改流程；校验失败后自我修正。'],
+  ['AI · 卡片', 'ai-card', 'VIP_ONGOING_REVIEW', 'AI 配置助手 · 修改卡片', '卡片模板随流程版本发布。'],
+  ['AI · 生效', 'ai-effect', 'VIP_ONGOING_REVIEW', 'AI 修改发布后实际生效', '经标准发布检查后发布；扫描用新门槛、新分支实际执行、卡片显示新字段。'],
+  ['AI · 护栏', 'ai-guard', 'VIP_ONGOING_REVIEW', 'AI 配置助手 · 护栏', '字段契约、revision 冲突、拒绝、数据脱敏、模型出错、会话持久化与审计。'],
 ];
 let idx = 0;
 const stepHtml = (s) => {
@@ -70,15 +89,16 @@ const gorows = gotests.map(([r, n, t]) => `<tr><td><span class="tag">${e((desc[n
 const abort = R.abort ? `<div class="panel" style="border-color:var(--bad)"><h2 style="color:var(--bad)">运行中止</h2><p>${e(R.abort)}</p></div>` : '';
 
 const html = `<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Bywork SOP 端到端测试报告</title>
+<title>Bywork SOP 集成测试报告</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;700&display=swap">
 <style>__CSS__</style></head><body><div class="wrap">
-<header><p class="eyebrow">End-to-end test report</p><h1>Bywork SOP 端到端测试报告</h1>
+<header><p class="eyebrow">End-to-end test report</p><h1>Bywork 端到端测试报告</h1>
 <div class="meta"><span>运行于 ${e(runAt)} (UTC+8)</span>${branch ? `<span>分支 <code>${e(branch)}</code></span>` : ''}${commit ? `<span>提交 <code>${e(commit)}</code></span>` : ''}<span>数据库 <code>${e(dbDriver)}</code></span></div>
-<p class="lede">真实浏览器按两条 SOP Alert 的业务路径操作界面，每一步截图，并同时对页面和 API 断言；Go 端到端测试使用真实数据库、引擎与心跳。</p></header>
+<p class="lede">真实浏览器按两条 SOP Alert 的业务路径操作界面，并单独走一遍 AI 配置助手（对话修改采集配置、处理流程、卡片，发布后验证生效，以及各项护栏）。每一步截图，同时对页面、API 和发给模型服务的请求断言；Go 端到端测试使用真实数据库、引擎与心跳。</p></header>
 ${abort}
 <div class="tiles">
 <div class="tile"><div class="n">${npass}/${checks.length}</div><div class="k">浏览器端到端断言</div><div class="h">${R.steps.length} 个场景步骤</div></div>
+${AI ? `<div class="tile"><div class="n">${aiPass}/${aiChecks.length}</div><div class="k">其中 AI 配置助手</div><div class="h">${AI.steps.length} 个步骤 · 模拟 OpenClaw</div></div>` : ''}
 <div class="tile"><div class="n">${gotests.length ? `${gpass}/${gotests.length}` : '—'}</div><div class="k">Go 测试</div><div class="h">${gotests.length ? pkgs.map((p) => `${e(p[1].split('/').pop())} ${e(p[0])}`).join(' · ') : '未提供 gotest.txt'}</div></div>
 <div class="tile"><div class="n">${nshots}</div><div class="k">UI 截图</div><div class="h">1440 × 900，Chromium</div></div>
 <div class="tile"><div class="n">${(R.pageErrors || []).length}</div><div class="k">前端报错</div><div class="h">pageerror 与 console.error</div></div>

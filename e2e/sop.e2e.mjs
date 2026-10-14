@@ -273,6 +273,28 @@ let cur = null;
   check('发布前检查全部通过', plan.ok, plan.checks.filter((c) => c.level === 'error').map((c) => c.text).join(';'));
   await shot('发布确认弹窗');
 
+  step('配置', 'AI 配置助手：对话生成提议 → 查看 diff → 接受到草稿', '配置人员用自然语言提出修改；助手读取草稿、调用 propose_config 生成提议并完成校验与试跑。提议不会直接生效：确认 diff 后才写入草稿，发布仍单独进行。e2e 使用脚本模拟模型（Provider: scripted），生产接入 OpenClaw。');
+  await p.goto(B + '/types/VIP_ONGOING_REVIEW/config'); await p.waitForTimeout(1000);
+  const before = await api('/api/task-types/VIP_ONGOING_REVIEW/config-draft', 'cfg_c');
+  await p.click('button:has-text("AI 助手")');
+  await p.waitForSelector('.ai-drawer');
+  await p.fill('.ai-input textarea', '把 48 小时改成 72 小时');
+  await p.click('.ai-input button[type=submit]');
+  await p.waitForSelector('.ai-proposal.pending', { timeout: 20000 });
+  await p.waitForSelector('.ai-msg.assistant:has-text("校验通过")', { timeout: 20000 });
+  check('助手生成了通过校验的采集配置提议', await p.locator('.ai-proposal.pending button:has-text("接受到草稿")').count() === 1);
+  await shot('AI 助手：对话与提议卡片');
+  await p.click('.ai-proposal.pending button:has-text("查看 diff")');
+  await p.waitForSelector('.modal .diff .add');
+  const added = await p.locator('.modal .diff .add').allTextContents();
+  check('diff 中出现 72h', added.join(' ').includes('72h'), added.join(' | '));
+  await shot('提议 diff');
+  await p.click('.modal button:has-text("接受到草稿")');
+  await p.waitForSelector('.ai-proposal.accepted', { timeout: 10000 });
+  const after = await api('/api/task-types/VIP_ONGOING_REVIEW/config-draft', 'cfg_c');
+  check('接受后草稿 revision 增加且包含 72h', after.revision > before.revision && JSON.stringify(after.spec).includes('72h'), `r${before.revision} → r${after.revision}`);
+  await shot('提议已接受到草稿');
+
   check('全程无前端报错', pageErrors.length === 0, pageErrors.join(' | '));
   fs.writeFileSync(`${OUT}/results.json`, JSON.stringify({ steps, pageErrors, at: new Date().toISOString() }, null, 1));
   const all = steps.flatMap((s) => s.checks);

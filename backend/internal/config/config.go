@@ -29,6 +29,24 @@ type Config struct {
 	ScanBudget      string   `json:",default=45s"`
 	OutboxMaxTry    int      `json:",default=6"`
 
+	// AI configuration assistant (docs/ai-assistant.md). Provider "openclaw"
+	// calls the OpenClaw Gateway's OpenAI-compatible endpoint; "openai" any
+	// Chat Completions endpoint (e.g. LiteLLM); "scripted" a deterministic
+	// stand-in for demos and tests.
+	AI struct {
+		Enabled       bool              `json:",default=false"`
+		Provider      string            `json:",default=scripted,options=openclaw|openai|scripted"`
+		BaseURL       string            `json:",default=http://127.0.0.1:18789/v1"`
+		APIKey        string            `json:",optional,env=BYWORK_AI_API_KEY"`
+		Model         string            `json:",default=openclaw/bywork"`
+		Headers       map[string]string `json:",optional"`
+		Stateful      bool              `json:",default=false"`
+		SampleRows    string            `json:",default=masked,options=masked|none"`
+		AllowedTables []string          `json:",default=[demo_case,demo_vip]"`
+		MaxSteps      int               `json:",default=12"`
+		TurnTimeout   string            `json:",default=5m"`
+	}
+
 	Lark struct {
 		Enabled           bool   `json:",default=false"`
 		BaseURL           string `json:",default=https://open.larksuite.com"`

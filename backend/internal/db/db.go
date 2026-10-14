@@ -70,11 +70,15 @@ func migrate(raw *sql.DB, driver string) error {
 			return fmt.Errorf("%w\n%s", err, stmt)
 		}
 	}
-	if fresh {
-		for _, stmt := range indexes {
-			if _, err := raw.Exec(stmt); err != nil {
-				return fmt.Errorf("%w\n%s", err, stmt)
+	// indexes: created on a fresh database, and added when a later version
+	// introduces new ones (existing indexes are skipped)
+	for _, stmt := range indexes {
+		if _, err := raw.Exec(stmt); err != nil {
+			msg := err.Error()
+			if !fresh && (strings.Contains(msg, "already exists") || strings.Contains(msg, "Duplicate key name") || strings.Contains(msg, "Error 1061")) {
+				continue
 			}
+			return fmt.Errorf("%w\n%s", err, stmt)
 		}
 	}
 	return nil

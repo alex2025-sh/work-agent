@@ -288,6 +288,45 @@ CREATE TABLE IF NOT EXISTS outbox (
   UNIQUE (event_key)
 ){{TAIL}};
 
+CREATE TABLE IF NOT EXISTS bw_ai_session (
+  id VARCHAR(40) NOT NULL PRIMARY KEY,
+  type_key VARCHAR(64) NOT NULL,
+  user_id VARCHAR(64) NOT NULL,
+  title VARCHAR(255) NOT NULL DEFAULT '',
+  status VARCHAR(16) NOT NULL DEFAULT 'idle',
+  created_at BIGINT NOT NULL DEFAULT 0,
+  updated_at BIGINT NOT NULL DEFAULT 0
+){{TAIL}};
+
+CREATE TABLE IF NOT EXISTS bw_ai_message (
+  id {{PK}},
+  session_id VARCHAR(40) NOT NULL,
+  turn INT NOT NULL DEFAULT 0,
+  role VARCHAR(16) NOT NULL,
+  content MEDIUMTEXT NOT NULL,
+  tool_calls MEDIUMTEXT NOT NULL,
+  tool_call_id VARCHAR(128) NOT NULL DEFAULT '',
+  name VARCHAR(64) NOT NULL DEFAULT '',
+  created_at BIGINT NOT NULL DEFAULT 0
+){{TAIL}};
+
+CREATE TABLE IF NOT EXISTS bw_ai_proposal (
+  id {{PK}},
+  session_id VARCHAR(40) NOT NULL,
+  type_key VARCHAR(64) NOT NULL,
+  kind VARCHAR(16) NOT NULL,
+  summary VARCHAR(1024) NOT NULL DEFAULT '',
+  base_revision INT NOT NULL DEFAULT 0,
+  payload MEDIUMTEXT NOT NULL,
+  validation MEDIUMTEXT NOT NULL,
+  ok INT NOT NULL DEFAULT 0,
+  status VARCHAR(16) NOT NULL DEFAULT 'pending',
+  created_by VARCHAR(64) NOT NULL DEFAULT '',
+  decided_by VARCHAR(64) NOT NULL DEFAULT '',
+  created_at BIGINT NOT NULL DEFAULT 0,
+  decided_at BIGINT NOT NULL DEFAULT 0
+){{TAIL}};
+
 CREATE TABLE IF NOT EXISTS demo_case (
   id {{PK}},
   appeal_id VARCHAR(64) NOT NULL,
@@ -334,4 +373,7 @@ var indexes = []string{
 	"CREATE INDEX idx_timer_due ON wf_timer (status, due_at, lease_until)",
 	"CREATE INDEX idx_outbox_retry ON outbox (status, next_retry_at)",
 	"CREATE INDEX idx_demo_case_stage ON demo_case (stage, stage_entered_at)",
+	"CREATE INDEX idx_ai_session_type ON bw_ai_session (type_key, user_id, updated_at)",
+	"CREATE INDEX idx_ai_message_session ON bw_ai_message (session_id, id)",
+	"CREATE INDEX idx_ai_proposal_session ON bw_ai_proposal (session_id, id)",
 }

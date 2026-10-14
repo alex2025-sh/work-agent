@@ -47,6 +47,7 @@ backend/
     task/                   任务域：TaskType / TaskConfig / 发布、扫描、Push、人工节点、卡片、投递 outbox、运营、查询
     datasrc/                只读 SQL（参数绑定 + 只读约束）与 data.* 能力
     expr/                   模板、时间表达式（case.created_at + 3d）、结构化条件
+    ai/                     AI 配置助手：对话循环、Bywork 侧工具、提议 / 接受、OpenClaw（OpenAI 兼容）客户端、脚本模拟
     handler/                HTTP 路由（RM / Leader / 配置 / Push / XXL-Job 心跳 / Lark 回调 / 开发接口）
     seed/                   演示成员、演示 CRM 数据、两条 VIP 需求的配置（走真实的草稿 → 发布 → 启用路径）
 frontend/src/
@@ -56,15 +57,20 @@ frontend/src/
   pages/type/FlowTab.tsx    任务类型 · 处理流程（ReactFlow 编辑器）
   pages/type/CardTab.tsx    任务类型 · 卡片
   pages/type/PublishDialog.tsx 发布确认 · 一起发布
+  components/AIAssistant.tsx AI 配置助手抽屉（流式对话、提议卡片、diff、接受到草稿）
   pages/DevPanel.tsx        演示台
 e2e/
   sop.e2e.mjs               浏览器端到端（Playwright），两条 SOP 全流程，逐步截图与断言
   report.mjs                生成 HTML 报告
 scripts/e2e-local.sh        一键本地端到端（MySQL / SQLite）
 docs/
+  ai-assistant.md           AI 配置助手：接入 OpenClaw、工具、提议流程、接口
+  adr/                      技术决策记录
   e2e.md                    本地端到端与 mock 数据
   implementation.md         设计 → 实现对照、生产部署说明、未完成项
   schema.mysql.sql          MySQL DDL
 ```
+
+AI 配置助手（对话修改采集配置 / 处理流程，接入公司 OpenClaw）见 [docs/ai-assistant.md](docs/ai-assistant.md)。
 
 部署（MySQL、XXL-Job 三个心跳、Lark、只读数据源、SSO）见 [docs/implementation.md](docs/implementation.md)。
